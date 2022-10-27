@@ -1,38 +1,36 @@
+import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 
 public class Server {
-    private ServerSocket serverSocket;
+    private Socket socket = null;
+    private ServerSocket server;
+    private DataInputStream inputStream = null;
 
-    public Server(ServerSocket serverSocket){
-        this.serverSocket = serverSocket;
-    }
-
-
-    public void startedServer(){
+    public Server(int port) {
         try {
 
-            while (!serverSocket.isClosed()){
-                //Wait till the user enterance then create a socket for this server.
-                Socket socket = serverSocket.accept();
-                System.out.println("A new Client is entered");
-                ClientHandler clientHandler = new ClientHandler(socket);
+            server = new ServerSocket(port);
+            System.out.println("Server started");
+            System.out.println("waiting for clients ...");
+            while (!server.isClosed()) {
+                //Wait for a client to connect .
+                socket = server.accept(); //This method blocks the server until a client is cpnnected and returns that socket
+                System.out.println("New user join the chat!!");
 
-                Thread thread = new Thread(clientHandler);
+                ClientHandler client = new ClientHandler(socket);
+
+                Thread thread = new Thread(client);
                 thread.start();
             }
-
-        }catch (Exception e){
-
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
+    public static void main(String[] args) {
 
-
-    public static void main(String[] args) throws  IOException {
-        ServerSocket serverSocket1 = new ServerSocket(1234);
-        Server server = new Server(serverSocket1);
-        server.startedServer();
-
+        Server server1 = new Server(5000);
     }
+
 }
